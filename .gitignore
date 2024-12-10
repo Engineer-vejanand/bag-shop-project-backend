@@ -1,0 +1,39 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables (sensitive data)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Static files (excluding these from git)
+public/images/
+public/stylesheet/
+public/javascript/
+
+# Development configuration (sensitive data)
+config/development.json
+
+# EJS templates (include all .ejs files)
+# If you want to upload EJS files, we don't ignore 'views/' anymore
+# Uncomment the line below if you still wish to ignore all EJS files
+# views/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*.~lock
+*.bak
+
+# Editor-specific files
+*.vscode/
+.idea/
