@@ -104,4 +104,9 @@ router.get("/cart/decrement/:productid", isloggedin, async function (req, res) {
 });
 
 
+router.get("/profile",isloggedin, async function(req,res){
+    let user = await userModel.findOne({email:req.user.email})
+    res.render("profile",{user})
+})
+
 module.exports = router;
