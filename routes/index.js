@@ -19,13 +19,41 @@ router.get("/shop",isloggedin,async function (req,res){
     res.render("shop",{products , success});
 })
 
-router.get("/cart",isloggedin,async function (req,res){
-    let user = await userModel.findOne({email:req.user.email}).populate("cart"); 
+router.get("/cart", isloggedin, async function (req, res) {
+    try {
+        let user = await userModel.findOne({ email: req.user.email }).populate("cart");
+        if(user.cart.length==0){
+            return res.redirect("/shop")
+        }
+        if (!user || !user.cart) {
+            return res.render("cart", { user: {}, cart: [], bill: 0, discount: 0, price: 0 });
+        }
 
-    const bill=Number(user.cart[0].price)+20-Number(user.cart[0].discount);
+        let discount = 0;
+        let price = 0;
+        let bill = 0;
+        let cart = user.cart;
 
-    res.render("cart",{user,bill});
-})
+        let groupedCart = {};
+        cart.forEach(item => {
+            const name = item.name;
+            if (!groupedCart[name]) {
+                groupedCart[name] = { ...item._doc, quantity: 1 }; 
+            } else {
+                groupedCart[name].quantity += 1;
+            }
+            discount += Number(item.discount);
+            price += Number(item.price);
+            bill = Number(item.price)  - Number(item.discount) +bill;
+        });
+
+        bill = bill+20;
+        res.render("cart", { user, cart: Object.values(groupedCart), bill, discount, price });
+    } catch (error) {
+        console.error("Error fetching cart:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 router.get("/addtocart/:productid",isloggedin, async function (req,res) {
     let user = await userModel.findOne({email:req.user.email});
@@ -34,5 +62,46 @@ router.get("/addtocart/:productid",isloggedin, async function (req,res) {
     req.flash("success","added to Cart");
     res.redirect("/shop") 
 })
+router.get("/addtocart/:productid",isloggedin, async function (req,res) {
+    let user = await userModel.findOne({email:req.user.email});
+    user.cart.push(req.params.productid);
+    await user.save();
+    req.flash("success","added to Cart");
+    res.redirect("/shop") 
+})
+
+router.get("/cart/increment/:productid",isloggedin, async function (req,res) {
+    let user = await userModel.findOne({email:req.user.email});
+    user.cart.push(req.params.productid);
+    await user.save();
+    // req.flash("success","added to Cart");
+    res.redirect("/cart") 
+})
+
+router.get("/cart/decrement/:productid", isloggedin, async function (req, res) {
+    try {
+        
+        let user = await userModel.findOne({ email: req.user.email });
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        const productIndex = user.cart.findIndex(item => item.toString() === req.params.productid);
+
+        if (productIndex === -1) {
+            return res.status(404).send("Product not found in cart");
+        }
+
+        user.cart.splice(productIndex, 1);
+
+        await user.save();
+        res.redirect("/cart");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
+    }
+});
+
 
 module.exports = router;
