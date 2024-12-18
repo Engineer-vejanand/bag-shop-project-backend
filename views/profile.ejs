@@ -17,7 +17,7 @@
                             <% user.orders.forEach(order => { %>
                                 <li class="bg-gray-700 p-4 rounded-lg shadow">
                                     <p class="font-medium text-gray-200">Order ID: <%= order.id %></p>
-                                    <p class="text-gray-400">Total: $<%= order.total %></p>
+                                    <p class="text-gray-400">Total: $<%= order.product.price %></p>
                                     <p class="text-gray-400">Date: <%= order.date %></p>
                                 </li>
                             <% }) %>

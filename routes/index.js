@@ -22,6 +22,7 @@ router.get("/shop",isloggedin,async function (req,res){
 router.get("/cart", isloggedin, async function (req, res) {
     try {
         let user = await userModel.findOne({ email: req.user.email }).populate("cart");
+        console.log(user.cart)
         if(user.cart.length==0){
             return res.redirect("/shop")
         }
@@ -105,8 +106,39 @@ router.get("/cart/decrement/:productid", isloggedin, async function (req, res) {
 
 
 router.get("/profile",isloggedin, async function(req,res){
-    let user = await userModel.findOne({email:req.user.email})
-    res.render("profile",{user})
+    try {
+        let user = await userModel
+            .findOne({ email: req.user.email })
+            .populate({
+                path: "orders.product", 
+                model: "product",
+            });
+        res.render("profile", { user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("An error occurred while loading the profile.");
+    }
 })
 
+router.get("/order", isloggedin, async function (req, res) {
+    try {
+        
+        let user = await userModel.findOne({ email: req.user.email }).populate("cart");
+
+        let cart = user.cart;
+
+        cart.forEach(item => {
+            let now = new Date();
+            let date = now.toLocaleString(); 
+            user.orders.push({ product: item._id, date }); 
+        });
+
+        user.cart = []; 
+        await user.save(); 
+        res.redirect("/profile"); 
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("An error occurred while processing the order.");
+    }
+});
 module.exports = router;

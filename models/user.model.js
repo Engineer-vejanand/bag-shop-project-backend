@@ -14,10 +14,12 @@ const userSchema = mongoose.Schema({
             ref:"product",
         },
     ],
-    orders:{
-        type:Array,
-        default:[],
-    },
+    orders: [
+        {
+            product: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
+            date: { type: String }, 
+        }
+    ],
     contact:Number,
     picture:String,
 });
