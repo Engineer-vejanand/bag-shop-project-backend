@@ -104,3 +104,26 @@ module.exports.getWishlist = async (req, res) => {
         res.status(500).json({ message: "Error fetching wishlist", error: error.message });
       }
 }
+
+module.exports.clearWishlist = async (req, res) => {
+    try {
+        const { userId } = req.body;
+    
+        if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+          return res.status(400).json({ message: "Invalid or missing userId" });
+        }
+    
+        const wishlist = await Wishlist.findOne({ user: userId });
+    
+        if (!wishlist) {
+          return res.status(404).json({ message: "Wishlist not found" });
+        }
+    
+        wishlist.products = [];
+        await wishlist.save();
+    
+        res.status(201).json({ message: "Wishlist cleared successfully", wishlist });
+      } catch (error) {
+        res.status(500).json({ message: "Error clearing wishlist", error: error.message });
+      }
+}
