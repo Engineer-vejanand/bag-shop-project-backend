@@ -36,3 +36,12 @@ module.exports.createCategory = async (req, res) => {
       res.status(500).json({ message: "Error creating category",error: error.message});
     }
  };
+
+module.exports.getAllCategory = async (req, res) => {
+try {
+    const categories = await Category.find().populate('parentCategory','name');
+    res.status(201).json({message:"success",categories});
+} catch (error) {
+    res.status(500).json({message:"Error fetching categories",error:error.message});
+}
+}
